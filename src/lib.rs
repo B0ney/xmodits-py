@@ -3,7 +3,7 @@ mod error;
 use error::XmError;
 use pyo3::prelude::*;
 
-// Dump a single tracker
+/// Dump a single tracker
 #[pyfunction]
 fn dump(
     path: String,                 // Path to tracker module
@@ -12,26 +12,23 @@ fn dump(
     index_padding: Option<usize>, // Set sample number padding
     index_only: Option<bool>,     // Only name sample by their number
     with_folder: Option<bool>,    // create new folder
-    // loop_points: Option<bool>,
     upper: Option<bool>,
     lower: Option<bool>,
-    hint: Option<String>,
 ) -> PyResult<()> {
-    dump_multiple(
-        vec![path],
+    api::rip_multiple(
+        &[path],
         destination,
         index_raw,
         index_padding,
         index_only,
         with_folder,
-        // loop_points,
         upper,
         lower,
-        hint,
     )
+    .map_err(|e| XmError(e).into())
 }
 
-// Dump multiple trackers
+/// Dump multiple trackers
 #[pyfunction]
 fn dump_multiple(
     path: Vec<String>,
@@ -40,27 +37,23 @@ fn dump_multiple(
     index_padding: Option<usize>,
     index_only: Option<bool>,
     with_folder: Option<bool>,
-    // loop_points: Option<bool>,
     upper: Option<bool>,
     lower: Option<bool>,
-    hint: Option<String>,
 ) -> PyResult<()> {
     api::rip_multiple(
-        path,
+        &path,
         destination,
         index_raw,
         index_padding,
         index_only,
         with_folder,
-        // loop_points,
         upper,
         lower,
-        hint,
     )
     .map_err(|e| XmError(e).into())
 }
 
-/// A Python module implemented in Rust.
+/// XMODITS python library
 #[pymodule]
 fn xmodits(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(dump, m)?)?;

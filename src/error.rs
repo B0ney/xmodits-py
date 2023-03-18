@@ -1,6 +1,6 @@
 use pyo3::exceptions::PyIOError;
 use pyo3::PyErr;
-use xmodits_lib::XmoditsError as _XmoditsError;
+use xmodits_lib::Error as _XmoditsError;
 
 macro_rules! batch_create_exceptions {
     ($($EXCEPTION:ident) *) => {
