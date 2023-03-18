@@ -1,5 +1,6 @@
 use std::path::Path;
 use xmodits_lib::common::extract;
+use xmodits_lib::exporter::ExportFormat;
 use xmodits_lib::interface::ripper::Ripper;
 use xmodits_lib::interface::Error;
 use xmodits_lib::SampleNamer;
@@ -13,14 +14,14 @@ pub fn rip_multiple<'a>(
     with_folder: Option<bool>,
     upper: Option<bool>,
     lower: Option<bool>,
+    format: Option<String>,
 ) -> Result<(), Error> {
-    let mut ripper = Ripper::default();
     let default_namer = SampleNamer::default();
     let index_padding = index_padding
         .map(|f| f as u8)
         .unwrap_or(default_namer.index_padding);
 
-    ripper.change_namer(
+    let ripper = Ripper::new(
         SampleNamer {
             index_only: index_only.unwrap_or_default(),
             index_padding,
@@ -30,6 +31,7 @@ pub fn rip_multiple<'a>(
             ..default_namer
         }
         .into(),
+        get_audio_format(format)?.into(),
     );
 
     let self_contained = with_folder.unwrap_or_default();
@@ -52,6 +54,26 @@ pub fn rip_multiple<'a>(
         Ordering::Less => Ok(()),
         Ordering::Equal => Err(errors.pop().unwrap()),
         Ordering::Greater => todo!(),
+    }
+}
+
+fn get_audio_format(str: Option<String>) -> Result<ExportFormat, Error> {
+    use ExportFormat::*;
+
+    match str.map(|x| &*x) {
+        None => Ok(ExportFormat::default()),
+        Some(str) => {
+            let format = match str {
+                "wav" => WAV,
+                "8svx" => IFF,
+                "aiff" => AIFF,
+                "raw" => RAW,
+                "its" => ITS,
+                "s3i" => S3I,
+                _ => todo!(),
+            };
+            Ok(format)
+        },
     }
 }
 
