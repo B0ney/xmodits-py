@@ -40,7 +40,7 @@ pub fn rip_multiple<'a>(
     let mut errors: Vec<Error> = paths
         .into_iter()
         .filter(|path| Path::new(path).is_file())
-        .map(|path| extract(path, destination, &ripper, self_contained))
+        .map(|path| extract(path, &destination, &ripper, self_contained))
         .filter_map(|result| result.err())
         .collect();
 
@@ -60,9 +60,10 @@ pub fn rip_multiple<'a>(
 fn get_audio_format(str: Option<String>) -> Result<AudioFormat, Error> {
     use AudioFormat::*;
 
-    match str.map(|x| &*x) {
+    match str {
         None => Ok(AudioFormat::default()),
         Some(str) => {
+            let str: &str = &str;
             let format = match str {
                 "wav" => WAV,
                 "8svx" => IFF,
@@ -73,10 +74,10 @@ fn get_audio_format(str: Option<String>) -> Result<AudioFormat, Error> {
                 _ => todo!(),
             };
             Ok(format)
-        },
+        }
     }
 }
 
-fn into(a: Option<bool>) -> bool {
-    a.unwrap_or_default()
-}
+// fn into(a: Option<bool>) -> bool {
+//     a.unwrap_or_default()
+// }

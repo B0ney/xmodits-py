@@ -1,6 +1,6 @@
 use pyo3::exceptions::PyIOError;
 use pyo3::PyErr;
-use xmodits_lib::Error as _XmoditsError;
+use xmodits_lib::interface::Error as XmoditsError;
 
 macro_rules! batch_create_exceptions {
     ($($EXCEPTION:ident) *) => {
@@ -11,46 +11,69 @@ macro_rules! batch_create_exceptions {
 }
 
 batch_create_exceptions!(
-    SampleExtractionError
-    UnsupportedFormatError
-    InvalidModuleError
-    EmptyModuleError
+    SampleExtraction
+    TotalExtraction
+    PartialExtraction
+    UnsupportedFormat
+    InvalidModule
+    InvalidSample
+    EmptyModule
+    NoFormatFound
+    AudioFormat
     Generic
 );
 
-pub struct XmError(pub _XmoditsError);
+pub struct Error(pub XmoditsError);
 
-impl From<&str> for XmError {
-    fn from(e: &str) -> Self {
-        Self(_XmoditsError::GenericError(e.to_owned()))
+impl Error {
+    pub fn py_err(error: XmoditsError) -> PyErr {
+        Self(error).into()
     }
 }
 
-impl From<_XmoditsError> for XmError {
-    fn from(e: _XmoditsError) -> Self {
-        Self(e)
-    }
-}
-// TODO: add module name / path to error
-impl From<XmError> for PyErr {
-    fn from(e: XmError) -> Self {
-        use _XmoditsError::*;
-
-        match e.0 {
-            SampleExtractionFailure(e) => {
-                PyErr::new::<SampleExtractionError, _>(format!("Failed to rip sample: {}", e))
-            }
-            UnsupportedFormat(e) => PyErr::new::<UnsupportedFormatError, _>(e),
-            InvalidModule(e) => PyErr::new::<InvalidModuleError, _>(e),
-            IoError(e) => PyErr::new::<PyIOError, _>(e.to_string()),
-            FileError(e) => PyErr::new::<PyIOError, _>(e),
-
-            EmptyModule => PyErr::new::<EmptyModuleError, _>("Module has no samples"),
-            GenericError(e) => PyErr::new::<Generic, _>(e),
-
-            MultipleErrors(errors) => {
-                PyErr::new::<Generic, _>(format!("multiple errors: {:#?}", errors))
-            }
+impl From<Error> for PyErr {
+    fn from(Error(inner): Error) -> Self {
+        match inner {
+            XmoditsError::Io(e) => PyIOError::new_err(e.to_string()),
+            XmoditsError::PartialExtraction(e) => partial(e),
+            XmoditsError::TotalExtraction(e) => total_failure(e),
+            XmoditsError::Extraction(e) => SampleExtraction::new_err(e),
+            XmoditsError::UnsupportedModule(e) => UnsupportedFormat::new_err(e),
+            XmoditsError::InvalidModule(e) => InvalidModule::new_err(e),
+            XmoditsError::EmptyModule => empty_module(),
+            XmoditsError::AudioFormat(e) => audio_format(e),
+            XmoditsError::BadSample { raw_index, .. } => invalid_sample(raw_index),
+            XmoditsError::NoFormatFound => no_format_found(),
         }
     }
+}
+
+fn empty_module() -> PyErr {
+    let err: String = "The module has no samples".into();
+    EmptyModule::new_err(err)
+}
+
+fn invalid_sample(index: u16) -> PyErr {
+    let err: String = format!("Sample with raw index {index} points to an invalid offset");
+    InvalidSample::new_err(err)
+}
+
+fn no_format_found() -> PyErr {
+    let err: String = format!("Could not determine a valid format");
+    InvalidSample::new_err(err)
+}
+
+fn audio_format(error: String) -> PyErr {
+    let err: String = format!("Could not export sample to desired format: {error}");
+    AudioFormat::new_err(err)
+}
+
+fn partial(_: Vec<XmoditsError>) -> PyErr {
+    let err: String = format!("Could not extract everything");
+    AudioFormat::new_err(err)
+}
+
+fn total_failure(_: Vec<XmoditsError>) -> PyErr {
+    let err: String = format!("Could not extract anything, the module might be corrupted");
+    AudioFormat::new_err(err)
 }

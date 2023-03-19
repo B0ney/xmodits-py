@@ -1,20 +1,20 @@
 mod api;
 mod error;
-use error::XmError;
+use error::Error;
 use pyo3::prelude::*;
 
 /// Dump a single tracker
 #[pyfunction]
 fn dump(
-    path: String,                   // Path to tracker module
-    destination: String,            // Folder to put ripped samples
-    index_raw: Option<bool>,        // Preserve sample number
-    index_padding: Option<usize>,   // Set sample number padding
-    index_only: Option<bool>,       // Only name sample by their number
-    with_folder: Option<bool>,      // Store ripped samples in a self-contained folder
-    upper: Option<bool>,            // Name samples in upper case
-    lower: Option<bool>,            // Name samples in lower case
-    format: Option<String>,         // Format of exported samples
+    path: String,                 // Path to tracker module
+    destination: String,          // Folder to put ripped samples
+    index_raw: Option<bool>,      // Preserve sample number
+    index_padding: Option<usize>, // Set sample number padding
+    index_only: Option<bool>,     // Only name sample by their number
+    with_folder: Option<bool>,    // Store ripped samples in a self-contained folder
+    upper: Option<bool>,          // Name samples in upper case
+    lower: Option<bool>,          // Name samples in lower case
+    format: Option<String>,       // Format of exported samples
 ) -> PyResult<()> {
     api::rip_multiple(
         &[path],
@@ -27,7 +27,7 @@ fn dump(
         lower,
         format,
     )
-    .map_err(|e| XmError(e).into())
+    .map_err(Error::py_err)
 }
 
 /// Dump multiple trackers
@@ -41,7 +41,7 @@ fn dump_multiple(
     with_folder: Option<bool>,
     upper: Option<bool>,
     lower: Option<bool>,
-    format: Option<String>
+    format: Option<String>,
 ) -> PyResult<()> {
     api::rip_multiple(
         &path,
@@ -52,9 +52,9 @@ fn dump_multiple(
         with_folder,
         upper,
         lower,
-        format
+        format,
     )
-    .map_err(|e| XmError(e).into())
+    .map_err(Error::py_err)
 }
 
 /// XMODITS python library
