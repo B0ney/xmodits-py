@@ -1,6 +1,6 @@
 use std::path::Path;
 use xmodits_lib::common::extract;
-use xmodits_lib::exporter::ExportFormat;
+use xmodits_lib::exporter::AudioFormat;
 use xmodits_lib::interface::ripper::Ripper;
 use xmodits_lib::interface::Error;
 use xmodits_lib::SampleNamer;
@@ -57,11 +57,11 @@ pub fn rip_multiple<'a>(
     }
 }
 
-fn get_audio_format(str: Option<String>) -> Result<ExportFormat, Error> {
-    use ExportFormat::*;
+fn get_audio_format(str: Option<String>) -> Result<AudioFormat, Error> {
+    use AudioFormat::*;
 
     match str.map(|x| &*x) {
-        None => Ok(ExportFormat::default()),
+        None => Ok(AudioFormat::default()),
         Some(str) => {
             let format = match str {
                 "wav" => WAV,
