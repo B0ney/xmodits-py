@@ -20,60 +20,57 @@ batch_create_exceptions!(
     EmptyModule
     NoFormatFound
     AudioFormat
+    MultipleErrors
     Generic
 );
 
-pub struct Error(pub XmoditsError);
-
-impl Error {
-    pub fn py_err(error: XmoditsError) -> PyErr {
-        Self(error).into()
-    }
+pub enum Error {
+    Single(XmoditsError),
+    Multiple(Vec<XmoditsError>),
 }
 
 impl From<Error> for PyErr {
-    fn from(Error(inner): Error) -> Self {
-        match inner {
-            XmoditsError::Io(e) => PyIOError::new_err(e.to_string()),
-            XmoditsError::PartialExtraction(e) => partial(e),
-            XmoditsError::TotalExtraction(e) => total_failure(e),
-            XmoditsError::Extraction(e) => SampleExtraction::new_err(e),
-            XmoditsError::UnsupportedModule(e) => UnsupportedFormat::new_err(e),
-            XmoditsError::InvalidModule(e) => InvalidModule::new_err(e),
-            XmoditsError::EmptyModule => empty_module(),
-            XmoditsError::AudioFormat(e) => audio_format(e),
-            XmoditsError::BadSample { raw_index, .. } => invalid_sample(raw_index),
-            XmoditsError::NoFormatFound => no_format_found(),
+    fn from(err: Error) -> Self {
+        match err {
+            Error::Single(inner) => match inner {
+                XmoditsError::Io(e) => PyIOError::new_err(e.to_string()),
+                XmoditsError::PartialExtraction(e) => PartialExtraction::new_err(partial(e)),
+                XmoditsError::TotalExtraction(e) => TotalExtraction::new_err(total_failure(e)),
+                XmoditsError::Extraction(e) => SampleExtraction::new_err(e),
+                XmoditsError::UnsupportedModule(e) => UnsupportedFormat::new_err(e),
+                XmoditsError::InvalidModule(e) => InvalidModule::new_err(e),
+                XmoditsError::EmptyModule => EmptyModule::new_err(empty_module()),
+                XmoditsError::AudioFormat(e) => AudioFormat::new_err(audio_format(e)),
+                XmoditsError::BadSample { raw_index, .. } => {
+                    InvalidSample::new_err(invalid_sample(raw_index))
+                }
+                XmoditsError::NoFormatFound => NoFormatFound::new_err(no_format_found()),
+            },
+            Error::Multiple(_) => MultipleErrors::new_err("Multiple Errors".to_string()), // todo
         }
     }
 }
 
-fn empty_module() -> PyErr {
-    let err: String = "The module has no samples".into();
-    EmptyModule::new_err(err)
+fn empty_module() -> String {
+    "The module has no samples".into()
 }
 
-fn invalid_sample(index: u16) -> PyErr {
-    let err: String = format!("Sample with raw index {index} points to an invalid offset");
-    InvalidSample::new_err(err)
+fn invalid_sample(index: u16) -> String {
+    format!("Sample with raw index {index} points to an invalid offset")
 }
 
-fn no_format_found() -> PyErr {
-    let err: String = format!("Could not determine a valid format");
-    InvalidSample::new_err(err)
+fn no_format_found() -> String {
+    "Could not determine a valid format".into()
 }
 
-fn audio_format(error: String) -> PyErr {
-    let err: String = format!("Could not export sample to desired format: {error}");
-    AudioFormat::new_err(err)
+fn audio_format(error: String) -> String {
+    format!("Could not export sample to desired format: {error}")
 }
 
-fn partial(_: Vec<XmoditsError>) -> PyErr {
-    let err: String = format!("Could not extract everything");
-    AudioFormat::new_err(err)
+fn partial(_: Vec<XmoditsError>) -> String {
+    format!("Could not extract everything")
 }
 
-fn total_failure(_: Vec<XmoditsError>) -> PyErr {
-    let err: String = format!("Could not extract anything, the module might be corrupted");
-    AudioFormat::new_err(err)
+fn total_failure(_: Vec<XmoditsError>) -> String {
+    format!("Could not extract anything, the module might be corrupted")
 }

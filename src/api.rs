@@ -1,8 +1,10 @@
+use super::error::Error;
+use std::cmp::Ordering;
 use std::path::Path;
 use xmodits_lib::common::extract;
 use xmodits_lib::exporter::AudioFormat;
 use xmodits_lib::interface::ripper::Ripper;
-use xmodits_lib::interface::Error;
+use xmodits_lib::interface::Error as XmoditsError;
 use xmodits_lib::SampleNamer;
 
 pub fn rip_multiple<'a>(
@@ -14,8 +16,9 @@ pub fn rip_multiple<'a>(
     with_folder: Option<bool>,
     upper: Option<bool>,
     lower: Option<bool>,
-    format: Option<String>,
+    _format: Option<String>,
 ) -> Result<(), Error> {
+    let format = None;
     let default_namer = SampleNamer::default();
     let index_padding = index_padding
         .map(|f| f as u8)
@@ -37,23 +40,17 @@ pub fn rip_multiple<'a>(
     let self_contained = with_folder.unwrap_or_default();
 
     // Collect errors during dumping
-    let mut errors: Vec<Error> = paths
+    let mut errors: Vec<XmoditsError> = paths
         .into_iter()
         .filter(|path| Path::new(path).is_file())
         .map(|path| extract(path, &destination, &ripper, self_contained))
         .filter_map(|result| result.err())
         .collect();
 
-    use std::cmp::Ordering;
-    // Compare size of errors
-    // return Ok(()) if errors.len() = 0
-    // Extract a single error & return it if errors.len() = 1
-    // Construct "MultipleErrors" to contain errors and return it if errors.len() > 1
-
     match errors.len().cmp(&1) {
         Ordering::Less => Ok(()),
-        Ordering::Equal => Err(errors.pop().unwrap()),
-        Ordering::Greater => todo!(),
+        Ordering::Equal => Err(Error::Single(errors.pop().unwrap())),
+        Ordering::Greater => Err(Error::Multiple(errors)),
     }
 }
 
@@ -77,7 +74,3 @@ fn get_audio_format(str: Option<String>) -> Result<AudioFormat, Error> {
         }
     }
 }
-
-// fn into(a: Option<bool>) -> bool {
-//     a.unwrap_or_default()
-// }

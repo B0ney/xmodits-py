@@ -27,7 +27,7 @@ fn dump(
         lower,
         format,
     )
-    .map_err(Error::py_err)
+    .map_err(PyErr::from)
 }
 
 /// Dump multiple trackers
@@ -54,7 +54,7 @@ fn dump_multiple(
         lower,
         format,
     )
-    .map_err(Error::py_err)
+    .map_err(PyErr::from)
 }
 
 /// XMODITS python library
