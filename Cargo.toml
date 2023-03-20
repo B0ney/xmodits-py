@@ -22,6 +22,6 @@ features = ["extension-module", "abi3-py37", "anyhow"]
 
 [profile.release]
 strip = true
-opt-level = 3     
+opt-level = "s"     
 lto = true          # Enable Link Time Optimization
 codegen-units = 1   # Reduce number of codegen units to increase optimizations.

@@ -1,6 +1,5 @@
 mod api;
 mod error;
-use error::Error;
 use pyo3::prelude::*;
 
 /// Dump a single tracker
@@ -30,38 +29,38 @@ fn dump(
     .map_err(PyErr::from)
 }
 
-/// Dump multiple trackers
-#[pyfunction]
-fn dump_multiple(
-    path: Vec<String>,
-    destination: String,
-    index_raw: Option<bool>,
-    index_padding: Option<usize>,
-    index_only: Option<bool>,
-    with_folder: Option<bool>,
-    upper: Option<bool>,
-    lower: Option<bool>,
-    format: Option<String>,
-) -> PyResult<()> {
-    api::rip_multiple(
-        &path,
-        destination,
-        index_raw,
-        index_padding,
-        index_only,
-        with_folder,
-        upper,
-        lower,
-        format,
-    )
-    .map_err(PyErr::from)
-}
+// /// Dump multiple trackers
+// #[pyfunction]
+// fn dump_multiple(
+//     path: Vec<String>,
+//     destination: String,
+//     index_raw: Option<bool>,
+//     index_padding: Option<usize>,
+//     index_only: Option<bool>,
+//     with_folder: Option<bool>,
+//     upper: Option<bool>,
+//     lower: Option<bool>,
+//     format: Option<String>,
+// ) -> PyResult<()> {
+//     api::rip_multiple(
+//         &path,
+//         destination,
+//         index_raw,
+//         index_padding,
+//         index_only,
+//         with_folder,
+//         upper,
+//         lower,
+//         format,
+//     )
+//     .map_err(PyErr::from)
+// }
 
 /// XMODITS python library
 #[pymodule]
 fn xmodits(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(dump, m)?)?;
-    m.add_function(wrap_pyfunction!(dump_multiple, m)?)?;
+    // m.add_function(wrap_pyfunction!(dump_multiple, m)?)?;
 
     Ok(())
 }
