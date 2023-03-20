@@ -33,7 +33,6 @@ xmodits.dump(file, folder)
 | ```index_padding``` | Set padding.<br > **e.g.** ```"01 - kick.wav"``` --> ```"1 - kick.wav"``` |
 | ```index_only``` | Only name samples with a number.<br> **e.g.** ```"09 - HiHat.wav"``` --> ```"09.wav"``` |
 | ```index_raw``` | Preserves the internal sample indexing  |
-| ```hint``` | Hint XMODITS to load a particular format first.<br> ```["it", "xm", "s3m", "mod", "umx", "mptm ]```  |
 | ```upper``` | Name samples in upper case |
 | ```lower``` | Name samples in lower case |
 
@@ -50,7 +49,7 @@ They're pretty much self explanitory.
 
 
 # Additional Examples
-### Dump multiple trackers
+<!-- ### Dump multiple trackers
 ```python
 import xmodits
 import os
@@ -65,7 +64,7 @@ xmodits.dump_multiple(
     with_folder=True
 )
 
-```
+``` -->
 
 ### Dump samples without names
 
