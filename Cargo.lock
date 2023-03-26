@@ -327,7 +327,7 @@ checksum = "9aec5da331524158c6d1a4ac0ab1541149c0b9505fde06423b02f5ef0106b9f0"
 [[package]]
 name = "xmodits-lib"
 version = "0.6.0"
-source = "git+https://github.com/B0ney/xmodits-lib#3d20ec960bed7c7c0e1a0e528af9c8bbbbb7cb3c"
+source = "git+https://github.com/B0ney/xmodits-lib#6c9a10e940e60c4e35a23d84d342df46b39e45af"
 dependencies = [
  "bytemuck",
  "extended",
