@@ -1,5 +1,6 @@
 use pyo3::exceptions::PyIOError;
 use pyo3::PyErr;
+use xmodits_lib::common::SUPPORTED_EXTENSIONS;
 use xmodits_lib::interface::Error as XmoditsError;
 
 macro_rules! batch_create_exceptions {
@@ -11,6 +12,7 @@ macro_rules! batch_create_exceptions {
 }
 
 batch_create_exceptions!(
+    UnrecognizedFileExtension
     SampleExtraction
     TotalExtraction
     PartialExtraction
@@ -25,30 +27,66 @@ batch_create_exceptions!(
 );
 
 pub enum Error {
-    Single(XmoditsError),
-    Multiple(Vec<XmoditsError>),
+    Xmodits(XmoditsError),
+    APIError(APIError),
+}
+
+pub enum APIError {
+    UnrecognizedFileExtension(String),
 }
 
 impl From<Error> for PyErr {
-    fn from(err: Error) -> Self {
-        match err {
-            Error::Single(inner) => match inner {
-                XmoditsError::Io(e) => PyIOError::new_err(e.to_string()),
-                XmoditsError::PartialExtraction(e) => PartialExtraction::new_err(partial(e)),
-                XmoditsError::TotalExtraction(e) => TotalExtraction::new_err(total_failure(e)),
-                XmoditsError::Extraction(e) => SampleExtraction::new_err(e),
-                XmoditsError::UnsupportedModule(e) => UnsupportedFormat::new_err(e),
-                XmoditsError::InvalidModule(e) => InvalidModule::new_err(e),
-                XmoditsError::EmptyModule => EmptyModule::new_err(empty_module()),
-                XmoditsError::AudioFormat(e) => AudioFormat::new_err(audio_format(e)),
-                XmoditsError::BadSample { raw_index, .. } => {
-                    InvalidSample::new_err(invalid_sample(raw_index))
-                }
-                XmoditsError::NoFormatFound => NoFormatFound::new_err(no_format_found()),
-            },
-            Error::Multiple(_) => MultipleErrors::new_err("Multiple Errors".to_string()), // todo
+    fn from(error: Error) -> Self {
+        match error {
+            Error::Xmodits(e) => convert_xmodits(e),
+            Error::APIError(e) => convert_api(e),
         }
     }
+}
+
+impl From<XmoditsError> for Error {
+    fn from(value: XmoditsError) -> Self {
+        Self::Xmodits(value)
+    }
+}
+
+impl From<APIError> for Error {
+    fn from(value: APIError) -> Self {
+        Self::APIError(value)
+    }
+}
+
+fn convert_xmodits(err: XmoditsError) -> PyErr {
+    match err {
+        XmoditsError::Io(e) => PyIOError::new_err(e.to_string()),
+        XmoditsError::PartialExtraction(e) => PartialExtraction::new_err(partial(e)),
+        XmoditsError::TotalExtraction(e) => TotalExtraction::new_err(total_failure(e)),
+        XmoditsError::Extraction(e) => SampleExtraction::new_err(e),
+        XmoditsError::UnsupportedModule(e) => UnsupportedFormat::new_err(e),
+        XmoditsError::InvalidModule(e) => InvalidModule::new_err(e),
+        XmoditsError::EmptyModule => EmptyModule::new_err(empty_module()),
+        XmoditsError::AudioFormat(e) => AudioFormat::new_err(audio_format(e)),
+        XmoditsError::BadSample { raw_index, .. } => {
+            InvalidSample::new_err(invalid_sample(raw_index))
+        }
+        XmoditsError::NoFormatFound => NoFormatFound::new_err(no_format_found()),
+    }
+}
+
+pub fn convert_api(err: APIError) -> PyErr {
+    match err {
+        APIError::UnrecognizedFileExtension(ext) => {
+            UnrecognizedFileExtension::new_err(unrecognized_extension(&ext))
+        }
+    }
+}
+
+fn unrecognized_extension(ext: &str) -> String {
+    format!(
+        "\"{}\" is not a recognized format. Supported formats: {:?}", 
+        ext, 
+        SUPPORTED_EXTENSIONS
+    )
 }
 
 fn empty_module() -> String {

@@ -13,10 +13,11 @@ fn dump(
     with_folder: Option<bool>,    // Store ripped samples in a self-contained folder
     upper: Option<bool>,          // Name samples in upper case
     lower: Option<bool>,          // Name samples in lower case
-    format: Option<String>,       // Format of exported samples
+    strict: Option<bool>,         
+    // format: Option<String>,       // Format of exported samples
 ) -> PyResult<()> {
-    api::rip_multiple(
-        &[path],
+    api::rip(
+        &path,
         destination,
         index_raw,
         index_padding,
@@ -24,37 +25,10 @@ fn dump(
         with_folder,
         upper,
         lower,
-        format,
+        strict,
     )
     .map_err(PyErr::from)
 }
-
-// /// Dump multiple trackers
-// #[pyfunction]
-// fn dump_multiple(
-//     path: Vec<String>,
-//     destination: String,
-//     index_raw: Option<bool>,
-//     index_padding: Option<usize>,
-//     index_only: Option<bool>,
-//     with_folder: Option<bool>,
-//     upper: Option<bool>,
-//     lower: Option<bool>,
-//     format: Option<String>,
-// ) -> PyResult<()> {
-//     api::rip_multiple(
-//         &path,
-//         destination,
-//         index_raw,
-//         index_padding,
-//         index_only,
-//         with_folder,
-//         upper,
-//         lower,
-//         format,
-//     )
-//     .map_err(PyErr::from)
-// }
 
 /// XMODITS python library
 #[pymodule]

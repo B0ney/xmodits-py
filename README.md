@@ -5,7 +5,7 @@ Supported formats:
 * Extended Module .XM
 * Scream Tracker .S3M
 * Amiga Pro Tracker .MOD
-* Open ModPlug Tracker .MPTM (Sample wise, it is identical to Impulse Tracker)
+* Open ModPlug Tracker .MPTM (Identical to Impulse Tracker sample-wise)
 * Unreal Music Container .UMX (Containing the above formats)
 # How to use
 ```python
@@ -22,7 +22,7 @@ xmodits.dump(file, folder)
 |Argument| Meaning|
 | --- | --- |
 | ```Path``` | Path to a tracker module |
-| ```Destination``` | Destination folder for dumped samples |
+| ```Destination``` | Destination folder for ripped samples |
 
 
 # Additional Arguments
@@ -35,36 +35,24 @@ xmodits.dump(file, folder)
 | ```index_raw``` | Preserves the internal sample indexing  |
 | ```upper``` | Name samples in upper case |
 | ```lower``` | Name samples in lower case |
+| ```strict``` | **Enabled by default.** <br>Will reject files that don't match the following file extensions:<br>[it, xm, s3m, mod, umx, mptm]|
 
 
 # Exceptions
-They're pretty much self explanitory.
+They are pretty much self explanitory.
 
 |Exception| Meaning|
 | --- | --- |
-|```SampleExtractionError```| Xmodits could not rip a sample.|
-| ```UnsupportedFormatError```  | The provided file extension is not recognised |
-| ```InvalidModuleError``` | The file is not a valid, tracker module  |
-| ```EmptyModuleError``` | The tracker module is valid but it has no samples! |
-
+|```SampleExtraction```| A sample could not be extracted |
+|```PartialExtraction```| Not all of the samples could be extracted |
+|```TotalExtraction```| None of the samples could be extracted |
+| ```UnsupportedFormat```  | A module format was recognized, but its type is not supported |
+| ```InvalidModule``` | The file is not a valid tracker module |
+| ```EmptyModule``` | The tracker module is valid but it has no samples |
+| ```UnrecognizedFileExtension``` | The file extension was not recognized |
+| ```NoFormatFound``` | Could not determine a valid format |
 
 # Additional Examples
-<!-- ### Dump multiple trackers
-```python
-import xmodits
-import os
-import glob
-
-folder = "~/Downloads/mods/it/"
-destination = "~/Music/Samples/"
-
-xmodits.dump_multiple(
-    glob.glob(folder +  "*b*"),
-    destination,
-    with_folder=True
-)
-
-``` -->
 
 ### Dump samples without names
 

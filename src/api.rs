@@ -1,14 +1,15 @@
-use super::error::Error;
-use std::cmp::Ordering;
+use crate::error::{APIError, Error};
+
+// use std::cmp::Ordering;
 use std::path::Path;
-use xmodits_lib::common::extract;
+use xmodits_lib::common::{extract, SUPPORTED_EXTENSIONS};
 use xmodits_lib::exporter::AudioFormat;
 use xmodits_lib::interface::ripper::Ripper;
-use xmodits_lib::interface::Error as XmoditsError;
+// use xmodits_lib::interface::Error as XmoditsError;
 use xmodits_lib::SampleNamer;
 
-pub fn rip_multiple<'a>(
-    paths: &[String],
+pub fn rip<'a>(
+    path: &String,
     destination: String,
     index_raw: Option<bool>,
     index_padding: Option<usize>,
@@ -16,61 +17,45 @@ pub fn rip_multiple<'a>(
     with_folder: Option<bool>,
     upper: Option<bool>,
     lower: Option<bool>,
-    _format: Option<String>,
+    strict: Option<bool>,
 ) -> Result<(), Error> {
-    let format = None;
-    let default_namer = SampleNamer::default();
-    let index_padding = index_padding
-        .map(|f| f as u8)
-        .unwrap_or(default_namer.index_padding);
+    let strict = strict.unwrap_or(true);
+    verify_extension(path, strict).map_err(Error::from)?;
 
+    let default_namer = SampleNamer::default();
     let ripper = Ripper::new(
         SampleNamer {
             index_only: index_only.unwrap_or_default(),
-            index_padding,
+            index_padding: index_padding
+                .map(|f| f as u8)
+                .unwrap_or(default_namer.index_padding),
             index_raw: index_raw.unwrap_or_default(),
             lower: lower.unwrap_or_default(),
             upper: upper.unwrap_or_default(),
             ..default_namer
         }
         .into(),
-        get_audio_format(format)?.into(),
+        AudioFormat::WAV.into(),
     );
 
     let self_contained = with_folder.unwrap_or_default();
 
-    // Collect errors during dumping
-    let mut errors: Vec<XmoditsError> = paths
-        .into_iter()
-        .filter(|path| Path::new(path).is_file())
-        .map(|path| extract(path, &destination, &ripper, self_contained))
-        .filter_map(|result| result.err())
-        .collect();
-
-    match errors.len().cmp(&1) {
-        Ordering::Less => Ok(()),
-        Ordering::Equal => Err(Error::Single(errors.pop().unwrap())),
-        Ordering::Greater => Err(Error::Multiple(errors)),
-    }
+    extract(path, &destination, &ripper, self_contained).map_err(Error::from)
 }
 
-fn get_audio_format(str: Option<String>) -> Result<AudioFormat, Error> {
-    use AudioFormat::*;
-
-    match str {
-        None => Ok(AudioFormat::default()),
-        Some(str) => {
-            let str: &str = &str;
-            let format = match str {
-                "wav" => WAV,
-                "8svx" => IFF,
-                "aiff" => AIFF,
-                "raw" => RAW,
-                "its" => ITS,
-                "s3i" => S3I,
-                _ => todo!(),
-            };
-            Ok(format)
-        }
+pub fn verify_extension(path: &String, strict: bool) -> Result<(), APIError> {
+    if !strict {
+        return Ok(());
     }
+
+    let ext = Path::new(path)
+        .extension()
+        .map(|f| f.to_string_lossy().to_ascii_lowercase())
+        .unwrap_or_default();
+
+    if !SUPPORTED_EXTENSIONS.contains(&ext.as_ref()) {
+        return Err(APIError::UnrecognizedFileExtension(ext));
+    }
+
+    Ok(())
 }
