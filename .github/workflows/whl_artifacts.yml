@@ -1,8 +1,0 @@
-name: Build whl Artifacts
-
-on:
-  workflow_dispatch:
-  workflow_call:
-
-jobs:
-  
