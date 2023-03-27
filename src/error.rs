@@ -82,11 +82,7 @@ pub fn convert_api(err: APIError) -> PyErr {
 }
 
 fn unrecognized_extension(ext: &str) -> String {
-    format!(
-        "\"{}\" is not a recognized format. Supported formats: {:?}", 
-        ext, 
-        SUPPORTED_EXTENSIONS
-    )
+    format!("\"{}\" is not a recognized format.", ext)
 }
 
 fn empty_module() -> String {
