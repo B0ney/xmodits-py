@@ -1,6 +1,18 @@
 /target
 .Cargo.lock
 
+*.wav
+*.aiff
+*.its
+*.raw
+
+*.umx
+*.it
+*.s3m
+*.xm
+*.mod
+*.pt3*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 .pytest_cache/
