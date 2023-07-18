@@ -18,7 +18,7 @@ git = "https://github.com/B0ney/xmodits-lib"
 rev = "2b8504f"
 
 [dependencies.pyo3]
-version = "0.18.1"
+version = "0.19.1"
 features = ["extension-module", "abi3-py37", "anyhow"]
 
 [profile.release]
