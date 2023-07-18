@@ -13,8 +13,9 @@ repository = "https://github.com/B0ney/xmodits-py"
 name = "xmodits"
 crate-type = ["cdylib"]
 
-[dependencies]
-xmodits-lib = { git = "https://github.com/B0ney/xmodits-lib", rev = "2101418bda6a7069a889ffc2d3076d963776e3b2"}
+[dependencies.xmodits-lib]
+git = "https://github.com/B0ney/xmodits-lib"
+rev = "2b8504f"
 
 [dependencies.pyo3]
 version = "0.18.1"
