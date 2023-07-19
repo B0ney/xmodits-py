@@ -8,7 +8,7 @@ use xmodits_lib::interface::ripper::Ripper;
 // use xmodits_lib::interface::Error as XmoditsError;
 use xmodits_lib::SampleNamer;
 
-pub fn rip<'a>(
+pub fn rip(
     path: &String,
     destination: String,
     index_raw: Option<bool>,
@@ -18,6 +18,7 @@ pub fn rip<'a>(
     upper: Option<bool>,
     lower: Option<bool>,
     strict: Option<bool>,
+    format: Option<String>,
 ) -> Result<(), Error> {
     let strict = strict.unwrap_or(true);
     verify_extension(path, strict).map_err(Error::from)?;
@@ -35,7 +36,7 @@ pub fn rip<'a>(
             ..default_namer
         }
         .into(),
-        AudioFormat::WAV.into(),
+        get_format(format)?.into(),
     );
 
     let self_contained = with_folder.unwrap_or_default();
@@ -58,4 +59,22 @@ pub fn verify_extension(path: &String, strict: bool) -> Result<(), APIError> {
     }
 
     Ok(())
+}
+
+fn get_format(format: Option<String>) -> Result<AudioFormat, APIError> {
+    let Some(format) = format else {
+        return Ok(AudioFormat::WAV);
+    };
+
+    let extension = format.to_lowercase();
+    let format = match extension.as_str() {
+        "wav" => AudioFormat::WAV,
+        "aiff" => AudioFormat::AIFF,
+        "8svx" => AudioFormat::IFF,
+        "its" => AudioFormat::ITS,
+        "s3i" => AudioFormat::S3I,
+        "raw" => AudioFormat::RAW,
+        _ => return Err(APIError::UnrecognizedFileExtension(extension)),
+    };
+    Ok(format)
 }

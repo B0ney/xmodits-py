@@ -1,6 +1,7 @@
 use pyo3::exceptions::PyIOError;
 use pyo3::PyErr;
 use xmodits_lib::common::SUPPORTED_EXTENSIONS;
+use xmodits_lib::interface::errors::{ExtractionError, FailedExtraction};
 use xmodits_lib::interface::Error as XmoditsError;
 
 macro_rules! batch_create_exceptions {
@@ -59,8 +60,6 @@ impl From<APIError> for Error {
 fn convert_xmodits(err: XmoditsError) -> PyErr {
     match err {
         XmoditsError::Io(e) => PyIOError::new_err(e.to_string()),
-        XmoditsError::PartialExtraction(e) => PartialExtraction::new_err(partial(e)),
-        XmoditsError::TotalExtraction(e) => TotalExtraction::new_err(total_failure(e)),
         XmoditsError::Extraction(e) => SampleExtraction::new_err(e),
         XmoditsError::UnsupportedModule(e) => UnsupportedFormat::new_err(e),
         XmoditsError::InvalidModule(e) => InvalidModule::new_err(e),
@@ -69,6 +68,15 @@ fn convert_xmodits(err: XmoditsError) -> PyErr {
         XmoditsError::BadSample { raw_index, .. } => {
             InvalidSample::new_err(invalid_sample(raw_index))
         }
+        XmoditsError::FailedRip(failed_extraction) => match failed_extraction {
+            FailedExtraction::Partial(partial_extraction) => {
+                PartialExtraction::new_err(partial(partial_extraction))
+            }
+            FailedExtraction::Total(total_extraction) => {
+                TotalExtraction::new_err(total_failure(total_extraction))
+            }
+        },
+
         XmoditsError::NoFormatFound => NoFormatFound::new_err(no_format_found()),
     }
 }
@@ -101,10 +109,10 @@ fn audio_format(error: String) -> String {
     format!("Could not export sample to desired format: {error}")
 }
 
-fn partial(_: Vec<XmoditsError>) -> String {
+fn partial(_: Vec<ExtractionError>) -> String {
     format!("Could not extract everything")
 }
 
-fn total_failure(_: Vec<XmoditsError>) -> String {
+fn total_failure(_: Vec<ExtractionError>) -> String {
     format!("Could not extract anything, the module might be corrupted")
 }

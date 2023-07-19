@@ -2,7 +2,7 @@
 name = "xmodits_py"
 authors = ["B0ney - https://github.com/B0ney"]
 description = "Extract samples from tracker modules. Supports IT, XM, S3M, MOD, UMX, MPTM"
-version = "0.2.4"
+version = "0.3.0"
 edition = "2021"
 license = "LGPLv3"
 readme = "README.md"

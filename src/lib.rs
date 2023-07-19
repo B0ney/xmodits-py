@@ -13,8 +13,8 @@ fn dump(
     with_folder: Option<bool>,    // Store ripped samples in a self-contained folder
     upper: Option<bool>,          // Name samples in upper case
     lower: Option<bool>,          // Name samples in lower case
-    strict: Option<bool>,         
-    // format: Option<String>,       // Format of exported samples
+    strict: Option<bool>,         // filter by extension
+    format: Option<String>,       // Format of exported samples
 ) -> PyResult<()> {
     api::rip(
         &path,
@@ -26,6 +26,7 @@ fn dump(
         upper,
         lower,
         strict,
+        format,
     )
     .map_err(PyErr::from)
 }
