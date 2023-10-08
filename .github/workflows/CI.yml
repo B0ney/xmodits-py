@@ -112,6 +112,12 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: wheels
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: "*.whl"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Publish to PyPI
         uses: PyO3/maturin-action@v1
         env:
