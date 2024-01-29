@@ -1,6 +1,5 @@
 use pyo3::exceptions::PyIOError;
 use pyo3::PyErr;
-use xmodits_lib::common::SUPPORTED_EXTENSIONS;
 use xmodits_lib::interface::errors::{ExtractionError, FailedExtraction};
 use xmodits_lib::interface::Error as XmoditsError;
 
