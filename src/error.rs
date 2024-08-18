@@ -1,7 +1,7 @@
 use pyo3::exceptions::PyIOError;
 use pyo3::PyErr;
-use xmodits_lib::interface::errors::{ExtractionError, FailedExtraction};
-use xmodits_lib::interface::Error as XmoditsError;
+
+use xmodits_lib::error::{Error as XmoditsError, ExtractionError, FailedExtraction};
 
 macro_rules! batch_create_exceptions {
     ($($EXCEPTION:ident) *) => {

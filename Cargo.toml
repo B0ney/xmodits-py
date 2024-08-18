@@ -2,7 +2,7 @@
 name = "xmodits_py"
 authors = ["B0ney - https://github.com/B0ney"]
 description = "Extract samples from tracker modules. Supports IT, XM, S3M, MOD, UMX, MPTM"
-version = "0.3.2"
+version = "0.3.3"
 edition = "2021"
 license = "LGPLv3"
 readme = "README.md"
@@ -15,7 +15,7 @@ crate-type = ["cdylib"]
 
 [dependencies.xmodits-lib]
 git = "https://github.com/B0ney/xmodits-lib"
-rev = "ce5d922"
+rev = "1773dfb"
 
 [dependencies.pyo3]
 version = "0.19.1"
