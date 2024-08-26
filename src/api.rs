@@ -1,8 +1,7 @@
 use crate::error::{APIError, Error};
 
-// use std::cmp::Ordering;
 use std::path::Path;
-use xmodits_lib::export::{extract, Format, Ripper, SampleNamer};
+use xmodits_lib::export::{extract, AudioFormat, Ripper, SampleNamer};
 use xmodits_lib::SUPPORTED_EXTENSIONS;
 
 pub fn rip(
@@ -31,9 +30,8 @@ pub fn rip(
             lower: lower.unwrap_or_default(),
             upper: upper.unwrap_or_default(),
             ..default_namer
-        }
-        .into(),
-        get_format(format)?.into(),
+        },
+        get_format(format)?,
     );
 
     let self_contained = with_folder.unwrap_or_default();
@@ -58,19 +56,19 @@ pub fn verify_extension(path: &String, strict: bool) -> Result<(), APIError> {
     Ok(())
 }
 
-fn get_format(format: Option<String>) -> Result<Format, APIError> {
+fn get_format(format: Option<String>) -> Result<AudioFormat, APIError> {
     let Some(format) = format else {
-        return Ok(Format::WAV);
+        return Ok(AudioFormat::WAV);
     };
 
     let extension = format.to_lowercase();
     let format = match extension.as_str() {
-        "wav" => Format::WAV,
-        "aiff" => Format::AIFF,
-        "8svx" => Format::IFF,
-        "its" => Format::ITS,
-        "s3i" => Format::S3I,
-        "raw" => Format::RAW,
+        "wav" => AudioFormat::WAV,
+        "aiff" => AudioFormat::AIFF,
+        "8svx" => AudioFormat::IFF,
+        "its" => AudioFormat::ITS,
+        "s3i" => AudioFormat::S3I,
+        "raw" => AudioFormat::RAW,
         _ => return Err(APIError::UnrecognizedFileExtension(extension)),
     };
     Ok(format)
