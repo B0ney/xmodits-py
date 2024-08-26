@@ -104,7 +104,7 @@ Output:
 15 - vocal.wav
 ```
 
-Samples stored in tracker modules can have an arbitary index. If you prefer to use this index, include the parameter:
+Samples stored in tracker modules can have an arbitrary index. If you prefer to use this index, include the parameter:
 
 ```python
 index_raw=True
@@ -118,8 +118,6 @@ You should include the parameter:
 with_folder=True
 ```
 
-
-
 ## development:
 https://docs.python.org/3/library/venv.html
 
@@ -131,7 +129,7 @@ activate virtual environment:
 
 ```source ./dev/bin/activate```
 
-install [maturin (crates.io)](https://crates.io/crates/maturin) or from [pipi](https://pypi.org/project/maturin/)
+install [maturin (crates.io)](https://crates.io/crates/maturin) or from [pypi](https://pypi.org/project/maturin/)
 
 run test library:
 
