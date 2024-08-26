@@ -15,7 +15,7 @@ crate-type = ["cdylib"]
 
 [dependencies.xmodits-lib]
 git = "https://github.com/B0ney/xmodits-lib"
-rev = "d51fe8e"
+rev = "6f4da08"
 
 [dependencies.pyo3]
 version = "0.19.1"
